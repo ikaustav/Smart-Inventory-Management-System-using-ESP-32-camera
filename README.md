@@ -6,6 +6,9 @@
 ![ESP32](https://img.shields.io/badge/Hardware-ESP32--CAM-orange.svg)
 ![License](https://img.shields.io/badge/License-MIT-purple.svg)
 
+> ⚠️ **NOTICE: GRADUAL ROLLOUT IN PROGRESS** ⚠️  
+> *The source code for this modular project is being uploaded gradually. If some files or modules appear to be missing, please check back soon! The complete architecture is documented below.*
+
 A modular, production-grade desktop application built for real-time industrial inventory management. By integrating an **ESP32-CAM** via local network communication with a **Python/OpenCV** backend, this platform automates stock counting through object detection and provides real-time low-stock alerts on a modern GUI dashboard.
 
 ---
