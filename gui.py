@@ -122,6 +122,7 @@ class InventoryApp(tk.Tk):
         for w in self.cards_frame.winfo_children():
             w.destroy()
         self._item_cards = []
+       
         for item in self.items:
             card = ItemCard(self.cards_frame, item, self._on_item_change)
             card.pack(fill="x", pady=4, padx=2)
@@ -143,9 +144,11 @@ class InventoryApp(tk.Tk):
             self.log.log(
                 f"Camera detected {count} object(s) → '{self.items[self._cam_item_idx].name}'",
                 "SUCCESS" if count > 0 else "WARN")
+           
 
     def _open_add_dialog(self):
         AddItemDialog(self, self._add_item)
+       
 
     def _add_item(self, item):
         self.items.append(item)
@@ -159,6 +162,7 @@ class InventoryApp(tk.Tk):
                                  self.cam_item_var.set(n),
                                  self._update_cam_item(n)))
         self.log.log(f"Added item: {item.name}", "SUCCESS")
+       
 
     def _monitor_loop(self):
         for item in self.items:
