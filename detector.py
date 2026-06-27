@@ -30,6 +30,7 @@ except ImportError:
 # ══════════════════════════════════════════════════════════════════════════════
 #  OBJECT DETECTOR  (OpenCV contour-based)
 # ══════════════════════════════════════════════════════════════════════════════
+
 class ObjectDetector:
     """Detects and counts objects in a camera frame using OpenCV contours."""
 
@@ -98,3 +99,4 @@ class ObjectDetector:
                         (6, h-10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (120,120,120), 1)
 
         return Image.fromarray(cv2.cvtColor(frame_display, cv2.COLOR_BGR2RGB)), count
+       
