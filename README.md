@@ -1,141 +1,145 @@
 # Smart Inventory Optimization Platform Using IIoT and Real-Time Analytics
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![OpenCV](https://img.shields.io/badge/OpenCV-4.5+-green.svg)
-![Tkinter](https://img.shields.io/badge/GUI-Tkinter-lightgrey.svg)
-![ESP32](https://img.shields.io/badge/Hardware-ESP32--CAM-orange.svg)
-![License](https://img.shields.io/badge/License-MIT-purple.svg)
+A desktop inventory management system that pairs an **ESP32-CAM** with a
+**Python + OpenCV + Tkinter** dashboard to automatically count shelf stock in
+real time, visualize inventory health, and raise low-stock alerts — all over
+a local Wi-Fi network.
 
-> ⚠️ **NOTICE: GRADUAL ROLLOUT IN PROGRESS** ⚠️  
-> *The source code for this modular project is being uploaded gradually. If some files or modules appear to be missing, please check back soon! The complete architecture is documented below.*
-
-A modular, production-grade desktop application built for real-time industrial inventory management. By integrating an **ESP32-CAM** via local network communication with a **Python/OpenCV** backend, this platform automates stock counting through object detection and provides real-time low-stock alerts on a modern GUI dashboard.
+> This repository is a **modular refactor** of the original single-file
+> prototype. Functionality is 100% identical to the original — the code has
+> only been reorganized into clean, single-responsibility modules.
 
 ---
 
 ## ✨ Features
 
-- **Real-Time IIoT Integration**: Connects seamlessly with an ESP32-CAM over HTTP to fetch live video streams and high-resolution snapshots.
-- **Automated Stock Counting**: Utilizes an OpenCV computer vision pipeline (grayscale conversion, Gaussian blur, adaptive thresholding, and contour detection) to identify and count items on the factory/warehouse floor.
-- **Modern Dashboard**: A clean, dark-themed Tkinter GUI featuring custom widgets, progress bars, and pulse badges.
-- **Smart Inventory Management**: Add, monitor, and manage custom inventory items with specific restock thresholds.
-- **Automated Alerts**: Real-time logging system that triggers visual warnings and logs when stock drops below predefined safe levels.
-- **Multi-threaded Architecture**: Ensures the GUI remains highly responsive while video streaming and heavy CV processing run in the background.
+- Live MJPEG / snapshot video feed from an ESP32-CAM
+- Real-time object detection & counting via an OpenCV contour pipeline
+- Draggable "shelf zone" region-of-interest selection on the live feed
+- Automatic inventory count updates driven by camera detections
+- Per-item low-stock / out-of-stock alerts (visual badge + log)
+- Animated stock-level bars and a live dashboard summary
+- Add/manage inventory items through a simple dialog
+- Demo mode for testing the UI without physical hardware
+- Works fully offline on a local Wi-Fi network
 
-## 📁 Project Structure
+---
 
-The codebase adheres to SOLID principles and clean code architecture, split into functional modules:
+## 🏗️ Architecture
 
-```text
+```
+ESP32-CAM  →  Wi-Fi  →  Python/OpenCV Detection  →  Inventory Update  →  Dashboard + Alerts
+```
+
+1. **Edge (ESP32-CAM):** captures shelf images and serves them over HTTP
+   (`/stream` for MJPEG, `/capture` for single snapshots).
+2. **Image Processing (OpenCV):** grayscale → Gaussian blur → adaptive
+   threshold → morphological closing → contour detection → area filtering →
+   object count.
+3. **Data Management:** in-memory inventory state, thresholds, and alert log.
+4. **Dashboard (Tkinter):** live camera view, inventory cards, stock bars,
+   summary bar, and alert log.
+5. **Alerts:** visual badges and color-coded log entries when stock is low
+   or out.
+
+---
+
+## 📂 Project Structure
+
+```
 Smart-Inventory-Optimization-IIoT/
 │
-├── main.py              # Application entry point
-├── gui.py               # Main Tkinter application assembly (InventoryApp)
-├── detector.py          # OpenCV image processing and object detection pipeline
-├── inventory.py         # Inventory business logic and state management
-├── camera.py            # ESP32-CAM communication, streaming, and threading
-├── alerts.py            # Real-time alert logging and notification system
-├── widgets.py           # Custom Tkinter UI components (Cards, Badges, Bars)
-├── config.py            # System configuration, theme colors, and camera URLs
+├── main.py            # Application entry point
 │
-├── assets/              # Static assets (icons, placeholder images)
-├── Arduino/             # ESP32-CAM C++ sketch for the web server
+├── gui.py             # InventoryApp — assembles the full application
+├── camera.py          # CameraPanel — ESP32 streaming/snapshot/threading
+├── detector.py        # ObjectDetector — OpenCV contour detection pipeline
+├── inventory.py       # InventoryItem — inventory business logic
+├── widgets.py         # StockBar, PulseBadge, ItemCard, SummaryBar, AddItemDialog
+├── alerts.py          # AlertLog — color-coded alert log widget
+├── config.py          # Theme colors, fonts, and constants
 │
-├── requirements.txt     # Python dependencies
-├── README.md            # Project documentation
-└── LICENSE              # MIT License
-
+├── assets/
+│   ├── icons/
+│   └── images/
+│
+├── Arduino/           # ESP32-CAM firmware (place your .ino sketch here)
+│
+├── requirements.txt
+├── README.md
+├── LICENSE
+└── .gitignore
 ```
 
-## 🛠️ Hardware Requirements
+### Module responsibilities
 
-* **ESP32-CAM Module** (with OV2640 camera)
-* FTDI Programmer (for flashing the ESP32)
-* 5V Power Supply
-* Wi-Fi Network
+| Module | Responsibility |
+|---|---|
+| `config.py` | Colors, fonts, and constants only — no logic |
+| `inventory.py` | `InventoryItem` stock business logic |
+| `detector.py` | `ObjectDetector` — OpenCV detection pipeline |
+| `camera.py` | `CameraPanel` — ESP32 connection, streaming, snapshots |
+| `widgets.py` | Custom Tkinter widgets used by the dashboard |
+| `alerts.py` | `AlertLog` alert log widget |
+| `gui.py` | `InventoryApp` — wires every module together |
+| `main.py` | Launches the application |
 
-## 💻 Software Requirements & Installation
+---
 
-1. **Clone the repository:**
-```bash
-git clone [https://github.com/yourusername/Smart-Inventory-Optimization-IIoT.git](https://github.com/yourusername/Smart-Inventory-Optimization-IIoT.git)
-cd Smart-Inventory-Optimization-IIoT
+## 🚀 Getting Started
 
-```
+### 1. Install dependencies
 
-
-2. **Create a Virtual Environment (Recommended):**
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows use: venv\Scripts\activate
-
-```
-
-
-3. **Install Dependencies:**
 ```bash
 pip install -r requirements.txt
-
 ```
 
-
-*Primary dependencies include `opencv-python`, `numpy`, and `Pillow`.*
-
-## 🚀 Usage Guide
-
-### 1. Configure the ESP32-CAM
-
-1. Open the Arduino IDE and navigate to the `Arduino/` folder.
-2. Open the ESP32-CAM sketch.
-3. Replace the `ssid` and `password` variables with your Wi-Fi credentials.
-4. Flash the code to your ESP32-CAM.
-5. Open the Serial Monitor to find the IP address assigned to the camera.
-
-### 2. Configure the Python App
-
-1. Open `config.py` in the project root.
-2. Locate the `DEFAULT_IP` variable.
-3. Update it with the IP address printed on your Arduino Serial Monitor:
-```python
-DEFAULT_IP = "192.168.1.XXX"
-
-```
-
-
-
-### 3. Run the Platform
-
-Start the application by running the main executable file:
+### 2. Run the application
 
 ```bash
 python main.py
-
 ```
 
-### 4. Using the Dashboard
+### 3. Connect your ESP32-CAM
 
-* **Add Items**: Click the "Add Item" button to create a new tracking profile (Name, Total Capacity, Restock Threshold).
-* **Assign Camera**: Select the active inventory item from the dropdown menu in the Camera Panel.
-* **Process Frame**: Click "Process Frame" to capture a snapshot, run the OpenCV detection pipeline, and update the stock count automatically.
+1. Flash your ESP32-CAM with a sketch that serves an MJPEG stream
+   (`/stream`) and/or a snapshot endpoint (`/capture`). See `Arduino/`.
+2. Enter the ESP32's IP address in the **ESP32 IP** field and click
+   **Apply IP**.
+3. Click **▶ CONNECT STREAM** (or **📷 SNAPSHOT** for single-frame mode).
+4. No hardware yet? Click **DEMO MODE** to preview the dashboard with a
+   simulated feed.
 
-## 🧠 Under the Hood (Computer Vision Pipeline)
+### 4. Set a detection zone (optional)
 
-The object detection mechanism relies on a robust thresholding technique rather than deep learning, ensuring high speed on edge/desktop hardware:
+Drag directly on the live camera feed to define a "shelf zone" — only
+objects inside that region will be counted. Right-click to clear it.
 
-1. **Grayscale Conversion**: Simplifies the image matrix.
-2. **Gaussian Blur**: Reduces high-frequency noise.
-3. **Adaptive Thresholding**: Handles uneven lighting environments perfectly.
-4. **Morphological Closing**: Fills in gaps inside detected objects.
-5. **Contour Area Filtering**: Discards artifacts that are too small or too large based on parameters in `config.py`.
+### 5. Bind the camera to an inventory item
+
+Use the **"Camera updates item"** dropdown to choose which inventory item's
+count is automatically driven by the live object count.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Edge:** ESP32-CAM, Arduino IDE, Wi-Fi (HTTP/MJPEG)
+- **Backend:** Python 3.x, OpenCV, NumPy, Pillow, Tkinter, urllib, threading
+
+---
+
+## 📋 Requirements
+
+- Python 3.9+
+- A Tk-enabled Python installation (Tkinter ships with most standard Python
+  installers; on Linux you may need `sudo apt install python3-tk`)
+- An ESP32-CAM on the same local network (optional — Demo Mode works without
+  one)
+
+---
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://www.google.com/search?q=https://github.com/yourusername/Smart-Inventory-Optimization-IIoT/issues).
-
-```
-
-```
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for
+details.
